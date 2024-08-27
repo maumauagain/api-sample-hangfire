@@ -1,0 +1,32 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqlserver2019
+    environment:
+      - SA_PASSWORD=YourStrong@Passw0rd
+      - ACCEPT_EULA=Y
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data3:/var/opt/mssql
+      - ./init.sql:/scripts/init.sql  # Mount the scripts directory
+    #Executa um script na inicialização
+    networks:
+      - app-network
+
+  api:
+    build: ../.
+    ports:
+      - "8080:8080"
+    depends_on:
+      - sqlserver
+    environment:
+      - ConnectionStrings__HangfireConnection=Server=sqlserver;Database=HangfireTest;User=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
+    networks:
+      - app-network
+
+networks:
+  app-network:
+
+volumes:
+  sqlserver-data3:
